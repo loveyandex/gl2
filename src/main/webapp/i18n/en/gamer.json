@@ -1,0 +1,35 @@
+{
+  "gamoLifeApp": {
+    "gamer": {
+      "home": {
+        "title": "Gamers",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Gamer",
+        "createOrEditLabel": "Create or edit a Gamer",
+        "notFound": "No Gamers found"
+      },
+      "created": "A new Gamer is created with identifier {{ param }}",
+      "updated": "A Gamer is updated with identifier {{ param }}",
+      "deleted": "A Gamer is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Gamer {{ id }}?"
+      },
+      "detail": {
+        "title": "Gamer"
+      },
+      "id": "ID",
+      "name": "Name",
+      "phonenumber": "Phonenumber",
+      "verifyCode": "Verify Code",
+      "referalCode": "Referal Code",
+      "score": "Score",
+      "canplayGameToday": "Canplay Game Today",
+      "user": "User",
+      "playhistory": "Playhistory",
+      "gameShare": "Game Share",
+      "inviter": "Inviter",
+      "invting": "Invting",
+      "game": "Game"
+    }
+  }
+}

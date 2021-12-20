@@ -1,0 +1,30 @@
+{
+  "name": "Game",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "javadoc": "name"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-many",
+      "otherEntityName": "gamer",
+      "otherEntityRelationshipName": "game",
+      "relationshipName": "gamer",
+      "ownerSide": true
+    }
+  ],
+  "javadoc": "The Game entity.\\n@author A true Abolfazl",
+  "entityTableName": "game",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["GamoLife"],
+  "changelogDate": "20211212144631"
+}

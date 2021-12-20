@@ -1,0 +1,100 @@
+/**
+ * The application configuration.
+ * @author A true Abolfazl
+ */
+application {
+  config {
+    baseName GamoLife,
+    applicationType monolith,
+    packageName com.tachnolife.gamolife,
+    authenticationType jwt,
+    prodDatabaseType mysql,
+    devDatabaseType mysql,
+    clientFramework react
+  }
+  entities *
+}
+
+
+/**
+ * The Gamer entity.
+ * @author A true Abolfazl
+ */
+
+entity Gamer {
+  name String,
+
+    phonenumber String required unique,
+
+    verifyCode String ,
+
+    referalCode String,
+
+    score Long,
+
+    canplayGameToday Boolean
+}
+/**
+ * The GameCondition entity.
+ * @author A true Abolfazl
+ */
+entity PlayHistory {
+  /** maxPlay */
+  maxPlay Integer 
+  datePlays Integer required 
+  playDate LocalDate required unique
+}
+/**
+ * The TodayShare entity.
+ * @author A true Abolfazl
+ */
+entity GameShare {
+  /** maxPlay */
+  maxPlay Integer 
+  shareTime Instant required
+}
+/**
+ * The Game entity.
+ * @author A true Abolfazl
+ */
+entity Game {
+  /** name */
+  name String
+}
+ 
+
+relationship ManyToOne {
+	Gamer{inviter} to Gamer{invting}
+}
+
+
+/**
+ * Many to many relationship.
+ */
+relationship ManyToMany {
+  Game to Gamer
+
+}
+/**
+ * One to many relationship.
+ */
+relationship OneToMany {
+  Gamer{playhistory} to PlayHistory
+}
+
+/**
+ * One to many relationship.
+ */
+relationship OneToMany {
+  Gamer{gameShare} to GameShare
+}
+
+
+
+/**
+ * One to one relationship.
+ */
+relationship OneToOne {
+  Gamer{User} to User
+}
+

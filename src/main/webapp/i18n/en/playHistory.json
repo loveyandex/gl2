@@ -1,0 +1,30 @@
+{
+  "gamoLifeApp": {
+    "playHistory": {
+      "home": {
+        "title": "Play Histories",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Play History",
+        "createOrEditLabel": "Create or edit a Play History",
+        "notFound": "No Play Histories found"
+      },
+      "created": "A new Play History is created with identifier {{ param }}",
+      "updated": "A Play History is updated with identifier {{ param }}",
+      "deleted": "A Play History is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Play History {{ id }}?"
+      },
+      "detail": {
+        "title": "Play History"
+      },
+      "id": "ID",
+      "maxPlay": "Max Play",
+      "datePlays": "Date Plays",
+      "playDate": "Play Date",
+      "gamer": "Gamer",
+      "help": {
+        "maxPlay": "maxPlay"
+      }
+    }
+  }
+}
