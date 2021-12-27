@@ -1,5 +1,6 @@
 package com.tachnolife.gamolife.web.rest;
 
+import com.tachnolife.gamolife.cunsome.SMSClient;
 import com.tachnolife.gamolife.domain.Authority;
 import com.tachnolife.gamolife.domain.Gamer;
 import com.tachnolife.gamolife.domain.User;
@@ -12,9 +13,11 @@ import com.tachnolife.gamolife.security.jwt.TokenProvider;
 import com.tachnolife.gamolife.web.rest.errors.BadRequestAlertException;
 import com.tachnolife.gamolife.web.rest.payload.ApiResponse;
 import com.tachnolife.gamolife.web.rest.payload.GSup;
+import com.tachnolife.gamolife.web.rest.payload.RestResponse;
 import com.tachnolife.gamolife.web.rest.vm.LoginVM;
+
 import net.bytebuddy.utility.RandomString;
-import org.apache.commons.lang3.StringUtils;
+import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +29,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
 import tech.jhipster.security.RandomUtil;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
@@ -234,7 +239,7 @@ public class GamerResource {
 
 
         if (user.getVerifyCode() == null)
-            throw new RuntimeException("there is no code sent as sms otp try to get one");
+            return new ResponseEntity(new RestResponse<>((false), (101), ("there is no code sent as sms otp try to get one"), null), HttpStatus.OK);
 
 
         if (user.getVerifyCode().equals(loginVM.getPassword()) && loginVM.getPassword() != null && !loginVM.getPassword().isEmpty()) {
@@ -247,8 +252,8 @@ public class GamerResource {
             httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
             return new ResponseEntity<>(new UserJWTController.JWTToken(jwt), httpHeaders, HttpStatus.OK);
         } else {
+            return new ResponseEntity(new RestResponse<>((false), (101), ("wrong code"), null), HttpStatus.OK);
 
-            throw new RuntimeException("wrong otp code");
         }
 
 
@@ -259,9 +264,32 @@ public class GamerResource {
     @Autowired
     private AuthorityRepository authorityRepository;
 
+    @Autowired
+    private SMSClient smsClient;
+
+
+    @Autowired
+    private OkHttpClient client;
+
 
     @PostMapping("/gamers/register")
-    public ResponseEntity<?> authoddr(@RequestBody GSup gamerSignUp) {
+    public ResponseEntity<?> authoddr(@RequestBody GSup gamerSignUp) throws IOException {
+
+
+//        try {
+//            HashMap<String, Object> params = new HashMap<>();
+//            params.put("username", "09122131691");
+//            params.put("password", "Yazdan990");
+//            params.put("message", gamerSignUp.phoneNumber);
+//            params.put("numbers", gamerSignUp.phoneNumber);
+//            params.put("sendernumber", 50004307L);
+//            params.put("sendtype", 1);
+//            smsClient.sendPtoPsms(params);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+
         Optional<Gamer> byPhonenumber = gamerRepository
             .findByPhonenumber(gamerSignUp.phoneNumber);
 
@@ -271,8 +299,13 @@ public class GamerResource {
 
         String refcode = RandomString.make(6);
         if (byPhonenumber.isPresent()) {
+
+            log.debug("ispresent ");
             Gamer gamer = byPhonenumber.get();
             gamer.verifyCode(make);
+
+            sendSms(gamerSignUp.phoneNumber, make);
+
             ApiResponse ok = new ApiResponse("ok");
             return new ResponseEntity<ApiResponse>(ok, HttpStatus.OK);
         } else {
@@ -294,16 +327,111 @@ public class GamerResource {
                 .save(new Gamer()
                     .referalCode(refcode)
                     .user(save)
-                    .phonenumber(gamerSignUp.phoneNumber));
-            ApiResponse ok = new ApiResponse("ok");
+                    .canplayGameToday(true)
+                    .maxCanPlay(1)
+                    .phonenumber(gamerSignUp.phoneNumber)
+                );
+
+            sendSmsAndWait(gamerSignUp.phoneNumber, make);
+            ApiResponse ok = new ApiResponse(make);
             return new ResponseEntity<ApiResponse>(ok, HttpStatus.OK);
         }
     }
 
-    @GetMapping("/users/me")
+
+    private void sendSms(String phoneNumber, String code) {
+
+        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+        String msg = "Your code is " + code;
+
+        okhttp3.RequestBody body = okhttp3.RequestBody
+            .create(mediaType, String.format("username=09122131691&password=Yazdan990&message=%s&numbers=%s&sendernumber=50004307&sendtype=1",
+                msg, phoneNumber));
+
+        Request request = new Request.Builder()
+            .url("https://niksms.com/fa/publicapi/groupsms")
+//            .url("https://example.com")
+            .method("POST", body)
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .addHeader("Cookie", "Localization=fa-IR")
+            .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(final Call call, IOException e) {
+                log.debug(e.toString());
+                // Error
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                String res = response.body().string();
+                log.debug(res);
+
+                // Do something with the response
+            }
+        });
+    }
+
+    private void sendSmsAndWait(String phoneNumber, String code) throws IOException {
+
+        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+        String msg = "Your code is " + code;
+
+        okhttp3.RequestBody body = okhttp3.RequestBody
+            .create(mediaType, String.format("username=09122131691&password=Yazdan990&message=%s&numbers=%s&sendernumber=50004307&sendtype=1",
+                msg, phoneNumber));
+
+        Request request = new Request.Builder()
+            .url("https://niksms.com/fa/publicapi/groupsms")
+            .method("POST", body)
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .addHeader("Cookie", "Localization=fa-IR")
+            .build();
+
+        Response execute = client.newCall(request).execute();
+
+
+    }
+
+    @GetMapping("/gamers/me")
 //    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<Principal> getUser(Principal principal) {
-        return new ResponseEntity<Principal>(principal, HttpStatus.OK);
+    public ResponseEntity getUser(Principal principal) {
+        String phone = principal.getName();
+        Gamer gamer = gamerRepository.findByPhonenumber(phone).orElse(null);
+
+        return new ResponseEntity(gamer, HttpStatus.OK);
+
+
+    }
+
+
+    @PatchMapping("/gamers/reduceMaxPlay")
+//    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<?> reduceMaxPlay(Principal principal) {
+        String phone = principal.getName();
+        Gamer gamer = gamerRepository.findByPhonenumber(phone).orElse(null);
+        if (gamer == null) {
+            return null;
+        }
+        gamer.maxCanPlay(gamer.getMaxCanPlay() - 1);
+
+        return new ResponseEntity(gamerRepository.save(gamer), HttpStatus.OK);
+
+    }
+
+
+    @PatchMapping("/gamers/increaseMaxPlay")
+//    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<?> increaseMaxPlay(Principal principal) {
+        String phone = principal.getName();
+        Gamer gamer = gamerRepository.findByPhonenumber(phone).orElse(null);
+        if (gamer == null) {
+            return null;
+        }
+        gamer.maxCanPlay(gamer.getMaxCanPlay() + 1);
+
+        return new ResponseEntity(gamerRepository.save(gamer), HttpStatus.OK);
 
     }
 

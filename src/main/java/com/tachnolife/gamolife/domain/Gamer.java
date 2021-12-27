@@ -2,11 +2,13 @@ package com.tachnolife.gamolife.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -43,33 +45,41 @@ public class Gamer implements Serializable {
     @Column(name = "canplay_game_today")
     private Boolean canplayGameToday;
 
+
+    @Column(name = "max_can_play")
+    private long maxCanPlay;
+
+
     @OneToOne
     @MapsId
     private User user;
 
-    @OneToMany(mappedBy = "gamer")
+    @OneToMany(mappedBy = "gamer",fetch = FetchType.EAGER)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "gamer" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"gamer"} )
     private Set<PlayHistory> playhistories = new HashSet<>();
 
-    @OneToMany(mappedBy = "gamer")
+    @OneToMany(mappedBy = "gamer",fetch = FetchType.EAGER)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "gamer" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"gamer"}, allowSetters = true)
     private Set<GameShare> gameShares = new HashSet<>();
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = { "user", "playhistories", "gameShares", "inviter", "invtings", "games" }, allowSetters = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties(value = {"user", "playhistories", "gameShares", "inviter", "invtings", "games"}, allowSetters = true)
     private Gamer inviter;
 
-    @OneToMany(mappedBy = "inviter")
+    @OneToMany(mappedBy = "inviter",fetch = FetchType.EAGER)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "user", "playhistories", "gameShares", "inviter", "invtings", "games" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"user", "playhistories", "gameShares", "inviter", "invtings", "games"}, allowSetters = true)
     private Set<Gamer> invtings = new HashSet<>();
 
-    @ManyToMany(mappedBy = "gamers")
+    @ManyToMany(mappedBy = "gamers",fetch = FetchType.EAGER)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "gamers" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"gamers"}, allowSetters = true)
     private Set<Game> games = new HashSet<>();
+
+
+
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -157,6 +167,14 @@ public class Gamer implements Serializable {
     public Gamer canplayGameToday(Boolean canplayGameToday) {
         this.canplayGameToday = canplayGameToday;
         return this;
+    }
+    public Gamer maxCanPlay(long maxCanPlay) {
+        this.maxCanPlay = maxCanPlay;
+        return this;
+    }
+
+    public long getMaxCanPlay() {
+        return this.maxCanPlay;
     }
 
     public void setCanplayGameToday(Boolean canplayGameToday) {

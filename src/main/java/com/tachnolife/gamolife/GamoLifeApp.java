@@ -11,6 +11,7 @@ import com.tachnolife.gamolife.domain.User;
 import com.tachnolife.gamolife.repository.AuthorityRepository;
 import com.tachnolife.gamolife.repository.UserRepository;
 import com.tachnolife.gamolife.security.AuthoritiesConstants;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +20,24 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
 import tech.jhipster.config.DefaultProfileUtil;
 import tech.jhipster.config.JHipsterConstants;
 import tech.jhipster.security.RandomUtil;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class })
+@EnableFeignClients
 public class GamoLifeApp {
+    @Bean
+     OkHttpClient client(){
+        return new OkHttpClient().newBuilder().build();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(GamoLifeApp.class);
 
@@ -71,8 +80,10 @@ public class GamoLifeApp {
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private AuthorityRepository authorityRepository;
 
@@ -97,8 +108,28 @@ public class GamoLifeApp {
         // new user gets registration key
         newUser.setActivationKey(RandomUtil.generateActivationKey());
         Set<Authority> authorities = new HashSet<>();
-        authorityRepository.findById(AuthoritiesConstants.ADMIN).ifPresent(authorities::add);
-        newUser.setAuthorities(authorities);
+
+        authorityRepository
+            .findById(AuthoritiesConstants.ADMIN)
+            .ifPresentOrElse(
+                authorities::add,
+                () -> {
+                    Authority s = new Authority(AuthoritiesConstants.ADMIN);
+                    authorities.add(s);
+                    authorityRepository.save(s);
+                }
+            );
+
+        authorityRepository
+            .findById(AuthoritiesConstants.USER)
+            .ifPresentOrElse(
+                authorities::add,
+                () -> {
+                    Authority s = new Authority(AuthoritiesConstants.USER);
+                    authorities.add(s);
+                    authorityRepository.save(s);
+                }
+            );        newUser.setAuthorities(authorities);
         userRepository.save(newUser);
 
     }
@@ -116,6 +147,14 @@ public class GamoLifeApp {
         Environment env = app.run(args).getEnvironment();
         logApplicationStartup(env);
     }
+
+    @RequestMapping("/")
+    public String index(){
+        System.out.println("Looking in the index controller.........");
+        return "index";
+    }
+
+
 
     private static void logApplicationStartup(Environment env) {
         String protocol = Optional.ofNullable(env.getProperty("server.ssl.key-store")).map(key -> "https").orElse("http");

@@ -1,8 +1,5 @@
 package com.tachnolife.gamolife.web.rest.payload;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 /**
  * @author Abolfazl
@@ -14,4 +11,6 @@ public class ApiResponse {
     public ApiResponse(String status) {
         this.status = status;
     }
+
+
 }

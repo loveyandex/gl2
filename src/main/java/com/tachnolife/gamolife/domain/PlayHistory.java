@@ -40,7 +40,7 @@ public class PlayHistory implements Serializable {
     @Column(name = "play_date", nullable = false, unique = true)
     private LocalDate playDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "user", "playhistories", "gameShares", "inviter", "invtings", "games" }, allowSetters = true)
     private Gamer gamer;
 

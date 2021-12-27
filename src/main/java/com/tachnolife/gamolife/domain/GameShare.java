@@ -3,19 +3,21 @@ package com.tachnolife.gamolife.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.Serializable;
-import java.time.Instant;
-import javax.persistence.*;
-import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * The TodayShare entity.\n@author A true Abolfazl
  */
 @ApiModel(description = "The TodayShare entity.\n@author A true Abolfazl")
 @Entity
-@Table(name = "game_share")
+@Table(name = "game_share",
+    uniqueConstraints = {@UniqueConstraint(name = "gamer_user_idshare_time", columnNames = {"share_time", "gamer_user_id"})})
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class GameShare implements Serializable {
 
@@ -34,10 +36,10 @@ public class GameShare implements Serializable {
 
     @NotNull
     @Column(name = "share_time", nullable = false)
-    private Instant shareTime;
+    private LocalDate shareTime;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = { "user", "playhistories", "gameShares", "inviter", "invtings", "games" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"user", "playhistories", "gameShares", "inviter", "invtings", "games"}, allowSetters = true)
     private Gamer gamer;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -67,16 +69,17 @@ public class GameShare implements Serializable {
         this.maxPlay = maxPlay;
     }
 
-    public Instant getShareTime() {
+    public LocalDate getShareTime() {
         return this.shareTime;
     }
 
-    public GameShare shareTime(Instant shareTime) {
+    public GameShare shareTime(LocalDate shareTime) {
         this.shareTime = shareTime;
         return this;
     }
 
-    public void setShareTime(Instant shareTime) {
+
+    public void setShareTime(LocalDate shareTime) {
         this.shareTime = shareTime;
     }
 
