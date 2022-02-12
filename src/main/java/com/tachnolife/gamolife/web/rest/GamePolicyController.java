@@ -4,6 +4,7 @@ import com.tachnolife.gamolife.domain.Gamer;
 import com.tachnolife.gamolife.repository.GameShareRepository;
 import com.tachnolife.gamolife.repository.GamerRepository;
 import com.tachnolife.gamolife.repository.UserRepository;
+import com.tachnolife.gamolife.security.AuthoritiesConstants;
 import com.tachnolife.gamolife.security.jwt.TokenProvider;
 import com.tachnolife.gamolife.web.rest.payload.GSup;
 import com.tachnolife.gamolife.web.rest.payload.UpdateScore;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ import java.time.LocalDate;
  */
 @RestController
 @RequestMapping("/api")
+@CrossOrigin
 @Transactional
-@CrossOrigin(origins = "http://localhost:9090")
 public class GamePolicyController {
 
 
@@ -79,10 +81,13 @@ public class GamePolicyController {
 
     }
 
+    @GetMapping("/gamers/gameshares")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<?> getgameshares(Principal principal) {
 
+        return new ResponseEntity<>(gameShareRepository.findAll(), null, HttpStatus.OK);
 
-
-
+    }
 
 
 }

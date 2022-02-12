@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,6 +19,12 @@ public interface GamerRepository extends JpaRepository<Gamer, Long> {
 
 
      Optional<Gamer> findByPhonenumber(String phone);
+
+
+    List<Gamer> findAllByUser_CreatedDateGreaterThanEqual(Instant createdDate);
+
+    @Query("select g from  Gamer  g where g.user.createdDate >:dat")
+    List<Gamer> findAllByUser_CreatedDate2(@Param(value = "dat") Instant dat);
 
     @Modifying
     @Query("update Gamer u set u.score = :score where u.phonenumber = :phone")

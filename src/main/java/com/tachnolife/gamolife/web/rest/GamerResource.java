@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -48,7 +52,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api")
 @Transactional
-@CrossOrigin(origins = "http://localhost:9090")
+@CrossOrigin
 public class GamerResource {
 
     private final Logger log = LoggerFactory.getLogger(GamerResource.class);
@@ -231,15 +235,20 @@ public class GamerResource {
 
 
     @PostMapping("/gamers/authenticate")
-    public ResponseEntity<UserJWTController.JWTToken> authoddrize(@Valid @RequestBody LoginVM loginVM) {
+    public ResponseEntity<?> authoddrize(@Valid @RequestBody LoginVM loginVM) {
 
         Gamer user = gamerRepository.findByPhonenumber(loginVM.getUsername()).orElseThrow(() -> {
             throw new RuntimeException("there is no user such login");
         });
 
 
-        if (user.getVerifyCode() == null)
-            return new ResponseEntity(new RestResponse<>((false), (101), ("there is no code sent as sms otp try to get one"), null), HttpStatus.OK);
+        if (user.getVerifyCode() == null) {
+            RestResponse<Object> objectRestResponse = new RestResponse<>( false ,  101 ,  "there is no code sent as sms otp try to get one" ,null );
+            throw new RuntimeException("there is no code sent as sms otp try to get one");
+
+
+//            return new ResponseEntity<RestResponse>(objectRestResponse, HttpStatus.OK);
+        }
 
 
         if (user.getVerifyCode().equals(loginVM.getPassword()) && loginVM.getPassword() != null && !loginVM.getPassword().isEmpty()) {
@@ -306,7 +315,7 @@ public class GamerResource {
 
             sendSms(gamerSignUp.phoneNumber, make);
 
-            ApiResponse ok = new ApiResponse("ok");
+            ApiResponse ok = new ApiResponse(make);
             return new ResponseEntity<ApiResponse>(ok, HttpStatus.OK);
         } else {
             User s = new User();
@@ -326,10 +335,12 @@ public class GamerResource {
             Gamer save1 = gamerRepository
                 .save(new Gamer()
                     .referalCode(refcode)
+                    .score(0L)
                     .user(save)
                     .canplayGameToday(true)
                     .maxCanPlay(1)
                     .phonenumber(gamerSignUp.phoneNumber)
+                    .verifyCode(make)
                 );
 
             sendSmsAndWait(gamerSignUp.phoneNumber, make);
@@ -432,6 +443,19 @@ public class GamerResource {
         gamer.maxCanPlay(gamer.getMaxCanPlay() + 1);
 
         return new ResponseEntity(gamerRepository.save(gamer), HttpStatus.OK);
+
+    }
+
+
+    @GetMapping("/gamers/today")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<?> fgtoday(Principal principal) {
+
+        Instant instant = ZonedDateTime.now().with(LocalTime.MIDNIGHT).toInstant();
+        List<Gamer> all = gamerRepository.findAllByUser_CreatedDateGreaterThanEqual(instant);
+
+        List<Gamer> allByUser_createdDate = gamerRepository.findAllByUser_CreatedDate2(instant);
+        return new ResponseEntity(allByUser_createdDate, HttpStatus.OK);
 
     }
 

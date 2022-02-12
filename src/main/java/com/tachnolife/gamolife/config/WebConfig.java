@@ -9,12 +9,16 @@ import tech.jhipster.config.JHipsterConstants;
 
 @Configuration
 @EnableWebMvc
-@Profile({ JHipsterConstants.SPRING_PROFILE_DEVELOPMENT })
-
+@Profile({JHipsterConstants.SPRING_PROFILE_DEVELOPMENT})
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
+        registry.addMapping("/api/**")
+            .allowedOriginPatterns("*")
+            .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE")
+            .allowCredentials(false).maxAge(3600);
+
     }
+
 }

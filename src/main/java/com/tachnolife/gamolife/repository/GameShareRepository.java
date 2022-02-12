@@ -26,4 +26,6 @@ public interface GameShareRepository extends JpaRepository<GameShare, Long> {
     void addAndupdateGameShareMaxPLayer(@Param(value = "phone") String phone, @Param(value = "date") LocalDate date);
 
 
+
+
 }

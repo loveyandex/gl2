@@ -26,6 +26,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import tech.jhipster.config.DefaultProfileUtil;
 import tech.jhipster.config.JHipsterConstants;
 import tech.jhipster.security.RandomUtil;
@@ -74,7 +77,6 @@ public class GamoLifeApp {
             );
         }
     }
-
 
 
 
@@ -186,4 +188,7 @@ public class GamoLifeApp {
             env.getActiveProfiles()
         );
     }
+
+
+
 }

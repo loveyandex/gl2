@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 /**
  * Created by Abolfazl Ghahremani(Joobin)  on 1/29/2021 , 8:14 PM.
  */
+@Getter
 
 public class RestResponse<T> {
     private boolean success;
