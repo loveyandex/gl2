@@ -19,7 +19,6 @@ logging:
     tech.jhipster: DEBUG
     org.hibernate.SQL: DEBUG
     com.tachnolife.gamolife: DEBUG
-
 spring:
   devtools:
     restart:
@@ -46,6 +45,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    database: mysql
 
   liquibase:
     # Remove 'faker' if you do not want the sample data to be loaded automatically

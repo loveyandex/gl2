@@ -284,19 +284,7 @@ public class GamerResource {
     @PostMapping("/gamers/register")
     public ResponseEntity<?> authoddr(@RequestBody GSup gamerSignUp) throws IOException {
 
-
-//        try {
-//            HashMap<String, Object> params = new HashMap<>();
-//            params.put("username", "09122131691");
-//            params.put("password", "Yazdan990");
-//            params.put("message", gamerSignUp.phoneNumber);
-//            params.put("numbers", gamerSignUp.phoneNumber);
-//            params.put("sendernumber", 50004307L);
-//            params.put("sendtype", 1);
-//            smsClient.sendPtoPsms(params);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        log.info("in /gamers/register docker image ?");
 
 
         Optional<Gamer> byPhonenumber = gamerRepository
