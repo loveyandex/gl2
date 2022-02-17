@@ -148,7 +148,7 @@ public class GamoLifeApp {
         DefaultProfileUtil.addDefaultProfile(app);
         Environment env = app.run(args).getEnvironment();
         logApplicationStartup(env);
-        log.info("god is here forever");
+        log.info("god is here forever 17 feb");
     }
 
     @RequestMapping("/")
